@@ -8,5 +8,13 @@ if (environment.production) {
   enableProdMode();
 }
 
+function displayNotification(): void {
+  if (Notification.permission === 'granted') {
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      reg.showNotification('Hello world!');
+    });
+  }
+}
+
 platformBrowserDynamic().bootstrapModule(AppModule)
   .catch(err => console.error(err));
