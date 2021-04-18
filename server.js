@@ -51,3 +51,6 @@ app.route('/api/notification').post((req, res) => {
     });
 });
 
+app.listen(8091, () => {
+  console.log('Server is started!');
+})
