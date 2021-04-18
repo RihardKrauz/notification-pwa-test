@@ -1,40 +1,57 @@
-import { Component } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { SwPush } from '@angular/service-worker';
-import { HttpClient } from '@angular/common/http';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'notification-pwa';
-  info: any = {
-    endpoint: '',
-    keys: {
-      p256dh: '',
-      auth: '',
-    },
-  };
+    title = 'notification-pwa';
 
-  readonly VAPID_PUBLIC_KEY = 'BG0DMhVn6rpUuLgFPBIeRcTNCgBlUimko5pgzdBPfpVnhbqbCGwkn-D4bJCp0gSMyzMbpRwXu8FheI471If3las';
+    @ViewChild('copyArea') copyArea: ElementRef<HTMLTextAreaElement>;
 
-  constructor(
-    private push: SwPush,
-  ) {}
+    info: any = {
+        endpoint: '',
+        keys: {
+            p256dh: '',
+            auth: '',
+        },
+    };
 
-  public action1(): void {
-    this.push
-      .requestSubscription({
-        serverPublicKey: this.VAPID_PUBLIC_KEY
-      })
-      .then(sub => this.info = sub.toJSON())
-      .catch(console.error);
-  }
+    readonly VAPID_PUBLIC_KEY = 'BG0DMhVn6rpUuLgFPBIeRcTNCgBlUimko5pgzdBPfpVnhbqbCGwkn-D4bJCp0gSMyzMbpRwXu8FheI471If3las';
 
-  public action2(): void {
-  }
+    constructor(
+        private push: SwPush,
+        @Inject(DOCUMENT) private document: Document,
+    ) {
+    }
 
-  public action3(): void {
-  }
+    public subscribeForNotifications(): void {
+        this.push
+            .requestSubscription({
+                serverPublicKey: this.VAPID_PUBLIC_KEY
+            })
+            .then(sub => this.info = sub.toJSON())
+            .catch(console.error);
+    }
+
+    public copySubscriptionKeys(): void {
+        if (!this.copyArea) { return; }
+
+        this.copyArea.nativeElement.value = JSON.stringify({
+            endpoint: this.info.endpoint,
+            p256dh: this.info.keys?.p256dh,
+            auth: this.info.keys?.auth,
+        });
+
+        this.copyArea.nativeElement.hidden = false;
+        this.copyArea.nativeElement.focus();
+        this.copyArea.nativeElement.select();
+        this.document.execCommand('copy');
+
+        this.copyArea.nativeElement.hidden = true;
+    }
+
 }

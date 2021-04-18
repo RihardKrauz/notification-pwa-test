@@ -1,6 +1,9 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const webpush = require('web-push');
 const app = express();
+
+app.use(bodyParser.json({ extended: true }));
 
 const vapidKeys = Object.freeze({
   'publicKey': 'BG0DMhVn6rpUuLgFPBIeRcTNCgBlUimko5pgzdBPfpVnhbqbCGwkn-D4bJCp0gSMyzMbpRwXu8FheI471If3las',
@@ -13,7 +16,7 @@ webpush.setVapidDetails(
   vapidKeys.privateKey
 );
 
-app.route('/api/notification').post((req, res) => {
+app.post('/api/notification', (req, res) => {
   const notificationPayload = {
     "notification": {
       "title": "Angular Push Test",
@@ -30,9 +33,7 @@ app.route('/api/notification').post((req, res) => {
     }
   };
 
-  const endpoint = '';
-  const p256dh = '';
-  const auth = '';
+  const { endpoint, p256dh, auth } = req.body;
 
   const sub = {
     endpoint,
@@ -43,7 +44,7 @@ app.route('/api/notification').post((req, res) => {
     }
   };
 
-  webpush.sendNotification(sub, notificationPayload)
+  webpush.sendNotification(sub, JSON.stringify(notificationPayload))
     .then(() => res.status(200).json({message: 'Push sent successfully.'}))
     .catch(err => {
       console.error("Error sending notification, reason: ", err);
