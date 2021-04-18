@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { SwPush } from '@angular/service-worker';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -7,32 +9,32 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'notification-pwa';
+  info: any = {
+    endpoint: '',
+    keys: {
+      p256dh: '',
+      auth: '',
+    },
+  };
+
+  readonly VAPID_PUBLIC_KEY = 'BG0DMhVn6rpUuLgFPBIeRcTNCgBlUimko5pgzdBPfpVnhbqbCGwkn-D4bJCp0gSMyzMbpRwXu8FheI471If3las';
+
+  constructor(
+    private push: SwPush,
+  ) {}
 
   public action1(): void {
-    Notification.requestPermission(function(status) {
-      console.log('Notification permission status:', status);
-    });
+    this.push
+      .requestSubscription({
+        serverPublicKey: this.VAPID_PUBLIC_KEY
+      })
+      .then(sub => this.info = sub.toJSON())
+      .catch(console.error);
   }
 
   public action2(): void {
-    if (!("Notification" in window)) {
-      alert("This browser does not support desktop notification");
-    }
+  }
 
-    // Let's check whether notification permissions have already been granted
-    else if (Notification.permission === "granted") {
-      // If it's okay let's create a notification
-      var notification = new Notification("Hi there!");
-    }
-
-    // Otherwise, we need to ask the user for permission
-    else if (Notification.permission !== "denied") {
-      Notification.requestPermission().then(function (permission) {
-        // If the user accepts, let's create a notification
-        if (permission === "granted") {
-          var notification = new Notification("Hi there!");
-        }
-      });
-    }
+  public action3(): void {
   }
 }
